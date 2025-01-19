@@ -13,4 +13,6 @@ UCLASS()
 class SHOOTHEMUP_API ASTUGameModeBase : public AGameModeBase
 {
     GENERATED_BODY()
+public:
+    ASTUGameModeBase();
 };
