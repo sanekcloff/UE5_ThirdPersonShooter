@@ -8,6 +8,8 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class USTUHealthComponent;
+class UTextRenderComponent;
 
 UCLASS()
 class SHOOTHEMUP_API ASTUBaseCharacter : public ACharacter
@@ -24,8 +26,24 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UCameraComponent* CameraComponent;
-    // Called when the game starts or when spawned
-    virtual void BeginPlay() override;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
+    USTUHealthComponent* HealthComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
+    UTextRenderComponent* HealthTextComponent;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    UAnimMontage* DeathAnimMontage;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Movement")
+    FVector2D LandedDamageVelocity = FVector2D(900.0f, 1200.0f);
+    UPROPERTY(EditDefaultsOnly, Category = "Movement")
+    FVector2D LandedDamage = FVector2D(10.0f, 100.0f);
+
+        // Called when the game starts or when spawned
+        virtual void
+        BeginPlay() override;
 
 public:
     // Called every frame
@@ -47,4 +65,9 @@ private:
     void MoveRight(float Amount);
     void OnStartRunning();
     void OnStopRunnig();
+    void OnDeath();
+    void OnHealthChanged(float Health);
+
+    UFUNCTION()
+    void OnGroundLanded(const FHitResult& Hit);
 };
