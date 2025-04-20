@@ -1,1 +1,10 @@
-Assets/
+/Assets
+/ShooThemUp/DerivedDataCache
+/ShooThemUp/Intermediate
+/ShooThemUp/Binaries
+/ShooThemUp/Saved
+/ShooThemUp/Build
+/ShooThemUp/.vs
+/ShooThemUp/*.sln
+/ShooThemUp/Content/Megascans
+/ShooThemUp/Content/PN_interactiveSpruceForest
