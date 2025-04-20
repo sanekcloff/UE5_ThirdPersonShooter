@@ -2,11 +2,14 @@
 
 #include "Components/STUHealthComponent.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/Controller.h"
 #include "Dev/STUFireDamageType.h"
 #include "Dev/STUIceDamageType.h"
-#include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "Camera/CameraShakeBase.h"
+#include "STUGameModeBase.h"
 
 // Sets default values for this component's properties
 USTUHealthComponent::USTUHealthComponent()
@@ -18,13 +21,27 @@ USTUHealthComponent::USTUHealthComponent()
     // ...
 }
 
+bool USTUHealthComponent::TryToAddHealth(float HealthAmount)
+{
+    if (IsDead() || IsHealthFull()) return false;
+    
+    SetHealth(Health + HealthAmount);
+    return true;
+}
+
+bool USTUHealthComponent::IsHealthFull() const
+{
+    return FMath::IsNearlyEqual(Health, MaxHealth);
+}
+
 // Called when the game starts
 void USTUHealthComponent::BeginPlay()
 {
     Super::BeginPlay();
 
+    check(MaxHealth > 0);
+
     SetHealth(MaxHealth);
-    OnHealthChanged.Broadcast(Health);
 
     auto ComponentOwner = GetOwner();
     if (ComponentOwner)
@@ -38,11 +55,13 @@ void USTUHealthComponent::OnTakeAnyDamage(
     AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
     if (Damage <= 0.0f || IsDead() || !GetWorld()) return;
+
     SetHealth(Health - Damage);
-    OnHealthChanged.Broadcast(Health);
+    GetWorld()->GetTimerManager().ClearTimer(AutoHealTimerHandle);
 
     if (IsDead())
     {
+        Killed(InstigatedBy);
         OnDeath.Broadcast();
     }
     else if (AutoHeal)
@@ -50,27 +69,14 @@ void USTUHealthComponent::OnTakeAnyDamage(
         GetWorld()->GetTimerManager().SetTimer(
             AutoHealTimerHandle, this, &USTUHealthComponent::HealUpdate, HealUpdateTime, true, HealDelay);
     }
-
-    UE_LOG(LogTemp, Warning, TEXT("%f"), Damage);
-    if (DamageType)
-    {
-        if (DamageType->IsA<USTUFireDamageType>())
-        {
-            GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Red, TEXT("So hot!"));
-        }
-        else if (DamageType->IsA<USTUIceDamageType>())
-        {
-            GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Cyan, TEXT("So cold!"));
-        }
-    }
+    PlayCameraShake();
 }
 
 void USTUHealthComponent::HealUpdate()
 {
     SetHealth(Health + HealModifier);
-    OnHealthChanged.Broadcast(Health);
 
-    if (FMath::IsNearlyEqual(Health,MaxHealth) && GetWorld())
+    if (IsHealthFull() && GetWorld())
     {
         GetWorld()->GetTimerManager().ClearTimer(AutoHealTimerHandle);
     }
@@ -78,5 +84,36 @@ void USTUHealthComponent::HealUpdate()
 
 void USTUHealthComponent::SetHealth(float Value)
 {
-    Health = FMath::Clamp(Value, 0.0f, MaxHealth);
+    const auto NextHealth = FMath::Clamp(Value, 0.0f, MaxHealth);
+
+    const auto HealthDelta = NextHealth - Health;
+
+    Health = NextHealth;
+    OnHealthChanged.Broadcast(Health, HealthDelta);
+}
+
+void USTUHealthComponent::PlayCameraShake() 
+{
+    if (IsDead()) return;
+    
+    const auto Player = Cast<APawn>(GetOwner());
+    if (!Player) return;
+
+    const auto Controller = Player->GetController<APlayerController>();
+
+    if (!Controller || !Controller->PlayerCameraManager) return;
+
+    Controller->PlayerCameraManager->StartCameraShake(CameraShake);
+}
+
+void USTUHealthComponent::Killed(AController* KillerController) 
+{
+    if (!GetWorld()) return;
+    const auto Gamemode = Cast<ASTUGameModeBase>(GetWorld()->GetAuthGameMode());
+    if (!Gamemode) return;
+
+    const auto Player = Cast<APawn>(GetOwner());
+    const auto VictimController = Player ? Player->Controller : nullptr;
+
+    Gamemode->KIlled(KillerController, VictimController);
 }
