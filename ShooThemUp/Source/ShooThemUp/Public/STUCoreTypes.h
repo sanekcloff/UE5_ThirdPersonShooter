@@ -107,3 +107,13 @@ struct FGameData
     int32 RespawnTime = 5;
 
 };
+
+UENUM(BlueprintType)
+enum class ESTUMatchState: uint8
+{
+    WaitingtoStart =0,
+    InProgress,
+    Pause,
+    GameOver
+};
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMatchStateChangedSignature, ESTUMatchState)
