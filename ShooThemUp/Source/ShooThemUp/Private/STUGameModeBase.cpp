@@ -10,6 +10,7 @@
 #include "STURespawnComponent.h"
 #include "EngineUtils.h"
 #include "STUWeaponComponent.h"
+#include "STUGameInstance.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSTUGameModeBase, All, All);
 

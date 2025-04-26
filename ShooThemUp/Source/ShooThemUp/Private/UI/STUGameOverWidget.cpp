@@ -7,9 +7,13 @@
 #include "STUPlayerStatRowWidget.h"
 #include "STUUtils.h"
 #include "Components/VerticalBox.h"
+#include "Components/Button.h"
+#include "Kismet/GameplayStatics.h"
 
-bool USTUGameOverWidget::Initialize()
+void USTUGameOverWidget::NativeOnInitialized()
 {
+    Super::NativeOnInitialized();
+
     if (GetWorld())
     {
         const auto Gamemode = Cast<ASTUGameModeBase>(GetWorld()->GetAuthGameMode());
@@ -18,7 +22,11 @@ bool USTUGameOverWidget::Initialize()
             Gamemode->OnMatchStateChanged.AddUObject(this, &USTUGameOverWidget::OnMatchStateChanged);
         }
     }
-    return Super::Initialize();
+
+    if (ResetLevelButton)
+    {
+        ResetLevelButton->OnClicked.AddDynamic(this, &USTUGameOverWidget::OnResetLevel);
+    }
 }
 
 void USTUGameOverWidget::OnMatchStateChanged(ESTUMatchState State) 
@@ -51,7 +59,16 @@ void USTUGameOverWidget::UpdatePlayersStat()
         PlayerStatRowWidget->SetDeaths(STUUtils::TextFromInt(PlayerState->GetDeathsNum()));
         PlayerStatRowWidget->SetTeam(STUUtils::TextFromInt(PlayerState->GetTeamID()));
         PlayerStatRowWidget->SetPlayerIndicatorVisibility(Controller->IsPlayerController());
+        PlayerStatRowWidget->SetTeamColor(PlayerState->GetTeamColor());
 
         PlayerStatBox->AddChild(PlayerStatRowWidget);
     }
+}
+
+void USTUGameOverWidget::OnResetLevel() 
+{
+    //const FName CurrentLevelName = "TestLevel";
+    const FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(this);
+    ;
+    UGameplayStatics::OpenLevel(this,FName(CurrentLevelName));
 }
