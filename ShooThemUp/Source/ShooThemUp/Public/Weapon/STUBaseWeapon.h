@@ -35,6 +35,8 @@ public:
     bool IsAmmoEmpty() const;
     bool IsAmmoFull() const;
 
+    virtual void Zoom(bool Enabled) {};
+
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     USkeletalMeshComponent* WeaponMesh;
@@ -46,7 +48,7 @@ protected:
     float TraceMaxDistance = 1500.0f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    FAmmoData DefaultAmmo{15,10,false};
+    FAmmoData DefaultAmmo{15, 10, false};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     FWeaponUIData UIData;
@@ -73,8 +75,7 @@ protected:
 
     void DecreaseAmmmo();
     bool IsClipEmpty() const;
-    
-    
+
     void LogAmmo();
 
     UNiagaraComponent* SpawnMuzzleFx();

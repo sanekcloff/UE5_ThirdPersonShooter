@@ -32,6 +32,8 @@ public:
 
     void StopCurrentWeaponFire();
 
+    void Zoom(bool Enabled);
+
 protected:
     
     int32 CurrentWeaponIndex = 0;

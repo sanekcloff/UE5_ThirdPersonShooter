@@ -95,6 +95,14 @@ void USTUWeaponComponent::StopCurrentWeaponFire()
     CurrentWeapon->StopFire();
 }
 
+void USTUWeaponComponent::Zoom(bool Enabled) 
+{
+    if (CurrentWeapon)
+    {
+        CurrentWeapon->Zoom(Enabled);
+    }
+}
+
 // Called when the game starts
 void USTUWeaponComponent::BeginPlay()
 {
@@ -155,6 +163,7 @@ void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex)
 
     if (CurrentWeapon)
     {
+        CurrentWeapon->Zoom(false);
         CurrentWeapon->StopFire();
         AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponArmorySocketName);
     }

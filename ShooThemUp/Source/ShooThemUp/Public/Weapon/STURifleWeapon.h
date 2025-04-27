@@ -30,6 +30,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     float DamageAmount = 15.0f;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    float FOVZoomAngle = 50.0f;
+
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
     UNiagaraSystem* TraceFX;
 
@@ -45,6 +48,8 @@ protected:
 
     bool GetTraceData(FVector& TraceStart, FVector& TraceEnd) const override;
 
+    virtual void Zoom(bool Enabled) override;
+
 
 private:
     FTimerHandle ShootTimerHandle;
@@ -54,6 +59,8 @@ private:
     UPROPERTY()
 
     UAudioComponent* FireAutioComponent;
+
+    float DefaultCameraFOV = 90.0f;
 
     void InitFX();
     void SetFXActive(bool IsActive);
