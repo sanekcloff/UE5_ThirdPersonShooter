@@ -10,6 +10,7 @@
 class USkeletalMeshComponent;
 class UNiagaraSystem;
 class UNiagaraComponent;
+class USoundCue;
 
 UCLASS()
 class SHOOTHEMUP_API ASTUBaseWeapon : public AActor
@@ -52,6 +53,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
     UNiagaraSystem* MuzzleFx;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    USoundCue* FireSound;
 
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;

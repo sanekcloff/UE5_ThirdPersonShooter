@@ -8,6 +8,8 @@
 #include "GameFramework/Controller.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapon, All, All);
 

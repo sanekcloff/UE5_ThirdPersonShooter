@@ -7,6 +7,7 @@
 #include "STUBasePickup.generated.h"
 
 class USphereComponent;
+class USoundCue;
 
 UCLASS()
 class SHOOTHEMUP_API ASTUBasePickup : public AActor
@@ -25,6 +26,9 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
     float RespawnTime = 5.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+    USoundCue* PickuptakenSound;
 
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
