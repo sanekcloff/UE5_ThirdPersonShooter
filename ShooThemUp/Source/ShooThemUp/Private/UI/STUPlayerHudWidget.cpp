@@ -5,6 +5,8 @@
 #include "Components/STUHealthComponent.h"
 #include "Components/STUWeaponComponent.h"
 #include "STUUtils.h"
+#include "Player/STUPlayerState.h"
+#include "Components/ProgressBar.h"
 
 float USTUPlayerHudWidget::GetHealthPercent() const
 {
@@ -40,15 +42,50 @@ bool USTUPlayerHudWidget::IsPlayerSpectating() const
     return Controller && Controller->GetStateName() == NAME_Spectating;
 }
 
-bool USTUPlayerHudWidget::Initialize()
+int32 USTUPlayerHudWidget::GetKillsNum() const
 {
+    const auto Controller = GetOwningPlayer();
+
+    if (!Controller) return 0;
+
+    const auto PlayerState = Cast<ASTUPlayerState>(Controller->PlayerState);
+
+    return PlayerState ? PlayerState->GetKillsNum() : 0;
+}
+
+int32 USTUPlayerHudWidget::GetDeathsNum() const
+{
+    const auto Controller = GetOwningPlayer();
+
+    if (!Controller) return 0;
+
+    const auto PlayerState = Cast<ASTUPlayerState>(Controller->PlayerState);
+
+    return PlayerState ? PlayerState->GetDeathsNum() : 0;
+}
+
+FString USTUPlayerHudWidget::FormatBullets(int32 BulletsNum) const
+{
+    const int32 MaxLen = 3;
+    const TCHAR PrefixDymbol = '0';
+    auto BulletStr = FString::FromInt(BulletsNum);
+    const auto SymbolsNumToAdd = MaxLen - BulletStr.Len();
+
+    if(SymbolsNumToAdd > 0)
+    {
+        BulletStr = FString::ChrN(SymbolsNumToAdd,PrefixDymbol).Append(BulletStr);
+    }
+    return BulletStr;
+}
+
+void USTUPlayerHudWidget::NativeOnInitialized()
+{
+    Super::NativeOnInitialized();
     if (GetOwningPlayer())
     {
         GetOwningPlayer()->GetOnNewPawnNotifier().AddUObject(this, &USTUPlayerHudWidget::OnNewPawn);
-        //OnNewPawn(GetOwningPlayerPawn());
+        OnNewPawn(GetOwningPlayerPawn());
     }
-    
-    return Super::Initialize();
 }
 
 void USTUPlayerHudWidget::OnHealthChanged(float Health, float HealthDelta)
@@ -56,7 +93,13 @@ void USTUPlayerHudWidget::OnHealthChanged(float Health, float HealthDelta)
     if (HealthDelta < 0.0f)
     {
         OnTakeDamage();
+
+        if (!IsAnimationPlaying(DamageAnimation))
+        {
+            PlayAnimation(DamageAnimation);
+        }
     }
+    UpdateHealthBar();
 }
 
 void USTUPlayerHudWidget::OnNewPawn(APawn* NewPawn) 
@@ -65,5 +108,15 @@ void USTUPlayerHudWidget::OnNewPawn(APawn* NewPawn)
     if (HealthComponent && !HealthComponent->OnHealthChanged.IsBoundToObject(this))
     {
         HealthComponent->OnHealthChanged.AddUObject(this, &USTUPlayerHudWidget::OnHealthChanged);
+    }
+    UpdateHealthBar();
+}
+
+void USTUPlayerHudWidget::UpdateHealthBar() 
+{
+    if (HealthProgressBar)
+    {
+        
+        HealthProgressBar->SetFillColorAndOpacity(GetHealthPercent() > PercentColorThreshold ? GoodColor : BadColor);
     }
 }

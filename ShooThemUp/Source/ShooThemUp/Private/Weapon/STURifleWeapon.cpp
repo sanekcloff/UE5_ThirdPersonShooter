@@ -7,6 +7,10 @@
 #include "Weapon/Components/STUWeaponFXComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "STUUtils.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 
 ASTURifleWeapon::ASTURifleWeapon() 
 {
@@ -15,14 +19,14 @@ ASTURifleWeapon::ASTURifleWeapon()
 
 void ASTURifleWeapon::StartFire()
 {
-    InitMuzzleFX();
+    InitFX();
     GetWorldTimerManager().SetTimer(ShootTimerHandle, this, &ASTURifleWeapon::MakeShoot, TimerBetweenShots, true);
     MakeShoot();
 }
 void ASTURifleWeapon::StopFire()
 {
     GetWorldTimerManager().ClearTimer(ShootTimerHandle);
-    SetMuzzleFXVisibility(false);
+    SetFXActive(false);
 }
 
 void ASTURifleWeapon::BeginPlay() 
@@ -70,20 +74,28 @@ bool ASTURifleWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
     TraceEnd = TraceStart + ShootDirection * TraceMaxDistance;
     return true;
 }
-void ASTURifleWeapon::InitMuzzleFX() 
+void ASTURifleWeapon::InitFX() 
 {
     if (!MuzzleFxComponent)
     {
         MuzzleFxComponent = SpawnMuzzleFx();
     }
-    SetMuzzleFXVisibility(true);
+    if (!FireAutioComponent)
+    {
+        FireAutioComponent = UGameplayStatics::SpawnSoundAttached(FireSound, WeaponMesh, MuzzleSocketName);
+    }
+    SetFXActive(true);
 }
-void ASTURifleWeapon::SetMuzzleFXVisibility(bool Visible) 
+void ASTURifleWeapon::SetFXActive(bool IsActive) 
 {
     if (MuzzleFxComponent)
     {
-        MuzzleFxComponent->SetPaused(!Visible);
-        MuzzleFxComponent->SetVisibility(Visible,true);
+        MuzzleFxComponent->SetPaused(!IsActive);
+        MuzzleFxComponent->SetVisibility(IsActive, true);
+    }
+    if(FireAutioComponent)
+    {
+        IsActive ? FireAutioComponent->Play() : FireAutioComponent->Stop();
     }
 }
 

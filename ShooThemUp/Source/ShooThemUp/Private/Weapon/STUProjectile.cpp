@@ -6,6 +6,7 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Weapon/Components/STUWeaponFXComponent.h"
+#include "STUUtils.h"
 
 // Sets default values
 ASTUProjectile::ASTUProjectile()
@@ -33,10 +34,9 @@ void ASTUProjectile::BeginPlay()
     Super::BeginPlay();
     check(MovementComponent);
     check(CollisionComponent);
-    check(WeaponFXComponent)
-    MovementComponent->Velocity = ShootDirection * MovementComponent->InitialSpeed;
-    CollisionComponent->IgnoreActorWhenMoving(GetOwner(),true);
-    CollisionComponent->OnComponentHit.AddDynamic(this,&ASTUProjectile::OnProjectileHit);
+    check(WeaponFXComponent) MovementComponent->Velocity = ShootDirection * MovementComponent->InitialSpeed;
+    CollisionComponent->IgnoreActorWhenMoving(GetOwner(), true);
+    CollisionComponent->OnComponentHit.AddDynamic(this, &ASTUProjectile::OnProjectileHit);
     SetLifeSpan(LifeSeconds);
 }
 
@@ -47,9 +47,10 @@ void ASTUProjectile::OnProjectileHit(
 
     MovementComponent->StopMovementImmediately();
 
-    UGameplayStatics::ApplyRadialDamage(GetWorld(), DamageAmount, GetActorLocation(), DamageRadius, UDamageType::StaticClass(), {GetOwner()}, this, nullptr, DoFullDamage);
+    UGameplayStatics::ApplyRadialDamage(
+        GetWorld(), DamageAmount, GetActorLocation(), DamageRadius, UDamageType::StaticClass(), {GetOwner()}, this, nullptr, DoFullDamage);
 
-    //DrawDebugSphere(GetWorld(), GetActorLocation(), DamageRadius, 24, FColor::Red, false, 5.0f);
+    // DrawDebugSphere(GetWorld(), GetActorLocation(), DamageRadius, 24, FColor::Red, false, 5.0f);
 
     WeaponFXComponent->PlayImpactFX(Hit);
 

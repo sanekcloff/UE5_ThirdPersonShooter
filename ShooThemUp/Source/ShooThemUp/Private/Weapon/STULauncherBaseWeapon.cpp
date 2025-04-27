@@ -1,18 +1,25 @@
 // Shoot Them Up Game. All Rights Reserved.,
 
-
 #include "Weapon/STULauncherBaseWeapon.h"
 #include "Weapon/STUProjectile.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
 
-void ASTULauncherBaseWeapon::StartFire() 
+void ASTULauncherBaseWeapon::StartFire()
 {
     MakeShoot();
 }
 
-void ASTULauncherBaseWeapon::MakeShoot() 
+void ASTULauncherBaseWeapon::MakeShoot()
 {
-    if (!GetWorld() || IsAmmoEmpty())
+    if (!GetWorld())
     {
+        return;
+    }
+
+    if (IsAmmoEmpty())
+    {
+        UGameplayStatics::SpawnSoundAtLocation(GetWorld(), NoAmmoSound, GetActorLocation());
         StopFire();
         return;
     }
@@ -30,7 +37,7 @@ void ASTULauncherBaseWeapon::MakeShoot()
     const FTransform SpawnTransform(FRotator::ZeroRotator, GetMuzzleWorldLocation());
     ASTUProjectile* Projectile = GetWorld()->SpawnActorDeferred<ASTUProjectile>(ProjectileClass, SpawnTransform);
 
-    if(Projectile)
+    if (Projectile)
     {
         Projectile->SetShootDirection(Direction);
         Projectile->SetOwner(GetOwner());
@@ -38,4 +45,5 @@ void ASTULauncherBaseWeapon::MakeShoot()
     }
     DecreaseAmmmo();
     SpawnMuzzleFx();
+    UGameplayStatics::SpawnSoundAttached(FireSound, WeaponMesh, MuzzleSocketName);
 }

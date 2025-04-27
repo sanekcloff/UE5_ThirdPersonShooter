@@ -10,6 +10,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/Controller.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All, All)
 
@@ -77,9 +79,10 @@ void ASTUBaseCharacter::SetPlayerColor(const FLinearColor& Color)
 
 void ASTUBaseCharacter::OnDeath() 
 {
-    GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, FString("Is dead"));
+    //GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, FString("Is dead"));
 
     //PlayAnimMontage(DeathAnimMontage);
+
 
     GetCharacterMovement()->DisableMovement();
 
@@ -90,6 +93,8 @@ void ASTUBaseCharacter::OnDeath()
 
     GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     GetMesh()->SetSimulatePhysics(true);
+
+    UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathSound, GetActorLocation());
 }
 
 void ASTUBaseCharacter::OnHealthChanged(float Health, float HealthDelta)
@@ -102,13 +107,13 @@ void ASTUBaseCharacter::OnGroundLanded(const FHitResult& Hit)
     const auto FallVelocityZ = -GetCharacterMovement()->Velocity.Z;
     if (GEngine)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, FString::Printf(TEXT("On landed: %f"), FallVelocityZ));
+        //GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, FString::Printf(TEXT("On landed: %f"), FallVelocityZ));
     }
     if (FallVelocityZ < LandedDamageVelocity.X) return;
     
     const auto FinalDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity,LandedDamage, FallVelocityZ);
 
-    GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, FString::Printf(TEXT("On hit: %f"), FinalDamage));
+    //GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, FString::Printf(TEXT("On hit: %f"), FinalDamage));
 
     TakeDamage(FinalDamage, FDamageEvent(), nullptr, nullptr);
 }

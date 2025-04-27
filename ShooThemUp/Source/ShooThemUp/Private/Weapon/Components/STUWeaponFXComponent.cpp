@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/DecalComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values for this component's properties
 USTUWeaponFXComponent::USTUWeaponFXComponent()
@@ -40,6 +41,9 @@ void USTUWeaponFXComponent::PlayImpactFX(const FHitResult& Hit)
         ImpactData.DecalData.Size,                                            //
         Hit.ImpactPoint,                                                      //
         Hit.ImpactNormal.Rotation());
+
+    //sound
+    UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactData.Sound, Hit.ImpactPoint);
 
     if (DecalCompoennt)
     {
